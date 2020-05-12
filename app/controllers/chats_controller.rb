@@ -5,6 +5,7 @@ class ChatsController < ApplicationController
   # GET /chats.json
   def index
     @chats = Chat.all
+    
   end
 
   # GET /chats/1
@@ -14,8 +15,8 @@ class ChatsController < ApplicationController
 
   # GET /chats/new
   def new
-    @chat = Chat.all
     @chat = Chat.new
+    @chats =Chat.all 
   end
 
   # GET /chats/1/edit
@@ -29,8 +30,9 @@ class ChatsController < ApplicationController
 
     respond_to do |format|
       if @chat.save
-        # format.html { redirect_to @chat, notice: 'Chat was successfully created.' }
-        # format.json { render :show, status: :created, location: @chat }
+        ActionCable.server.broadcast 'room_channel', content: @chat 
+        format.html { redirect_to @chat, notice: 'Chat was successfully created.' }
+        format.json { render :show, status: :created, location: @chat }
         format.js
       else
         format.html { render :new }
@@ -57,9 +59,12 @@ class ChatsController < ApplicationController
   # DELETE /chats/1.json
   def destroy
     @chat.destroy
+    ActionCable.server.broadcast 'remove_channel', content: @chat 
+
     respond_to do |format|
       format.html { redirect_to chats_url, notice: 'Chat was successfully destroyed.' }
       format.json { head :no_content }
+      format.js
     end
   end
 
@@ -69,7 +74,7 @@ class ChatsController < ApplicationController
       @chat = Chat.find(params[:id])
     end
 
-    # Only allow a list of trusted parameters through.
+    # Never trust parameters from the scary internet, only allow the white list through.
     def chat_params
       params.require(:chat).permit(:message)
     end
