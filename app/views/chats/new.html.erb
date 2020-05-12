@@ -1,5 +1,4 @@
-<h1>New Chat</h1>
-
-<%= render 'form', chat: @chat %>
-
-<%= link_to 'Back', chats_path %>
+<% @chats.each do |chat| %>
+<p><%= chat.message %></p>
+<% end %>
+<div id="new_message"%></div>
